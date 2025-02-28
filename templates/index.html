@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h2 class="text-center mb-4">Choose Your Character</h2>
+    <div class="row">
+      {% for char_id, char in characters.items() %}
+      <div class="col-md-4 mb-4">
+        <div class="card bg-secondary text-light h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ char.name }}</h5>
+            <p class="card-text">{{ char.description }}</p>
+            <ul class="list-unstyled">
+              <li>HP: {{ char.hp }}</li>
+              <li>Attack: {{ char.attack }}</li>
+              <li>Defense: {{ char.defense }}</li>
+              <li>Speed: {{ char.speed }}</li>
+            </ul>
+            <button class="btn btn-primary select-character" data-character="{{ char_id }}">
+              Select {{ char.name }}
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.select-character');
+    buttons.forEach(button => {
+      button.addEventListener('click', function () {
+        const characterType = this.dataset.character;
+        fetch('/select_character', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `character_type=${characterType}`
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              window.location.href = '/battle';
+            } else {
+              alert('Error selecting character: ' + data.error);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error selecting character');
+          });
+      });
+    });
+  });
+</script>
+{% endblock %}

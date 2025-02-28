@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="battle-container">
+      <!-- Character Stats -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card bg-secondary">
+            <div class="card-body">
+              <h5 class="card-title">{{ player.name }}</h5>
+              <div class="progress mb-2">
+                <div class="progress-bar bg-success" role="progressbar" id="player-hp-bar" style="width: 100%;"
+                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                  HP: <span id="player-hp">{{ player.current_hp }}</span>/{{ player.max_hp }}
+                </div>
+              </div>
+              <p>Level: {{ player.level }} (EXP: {{ player.experience }}/100)</p>
+              <p>Attack: {{ player.attack }} | Defense: {{ player.defense }} | Speed: {{ player.speed }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card bg-danger">
+            <div class="card-body">
+              <h5 class="card-title" id="enemy-name"></h5>
+              <div class="progress mb-2">
+                <div class="progress-bar bg-success" role="progressbar" id="enemy-hp-bar" style="width: 100%;"
+                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                  HP: <span id="enemy-hp"></span>/<span id="enemy-max-hp"></span>
+                </div>
+              </div>
+              <p>Attack: <span id="enemy-attack"></span> | Defense: <span id="enemy-defense"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Battle Log -->
+      <div class="card bg-dark mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Battle Log</h5>
+          <div id="battle-log" class="battle-log"></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-center gap-2">
+        <button class="btn btn-primary action-btn" data-action="attack">Attack</button>
+        <button class="btn btn-secondary action-btn" data-action="defend">Defend</button>
+        <button class="btn btn-success action-btn" data-action="heal">Heal</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let battleState = null;
+
+  function updateUI(state) {
+    battleState = state;
+
+    // Update player stats
+    document.getElementById('player-hp').textContent = state.player.current_hp;
+    const playerHpPercent = (state.player.current_hp / state.player.max_hp) * 100;
+    document.getElementById('player-hp-bar').style.width = `${playerHpPercent}%`;
+
+    // Update enemy stats
+    document.getElementById('enemy-name').textContent = state.enemy.name;
+    document.getElementById('enemy-hp').textContent = state.enemy.current_hp;
+    document.getElementById('enemy-max-hp').textContent = state.enemy.max_hp;
+    const enemyHpPercent = (state.enemy.current_hp / state.enemy.max_hp) * 100;
+    document.getElementById('enemy-hp-bar').style.width = `${enemyHpPercent}%`;
+    document.getElementById('enemy-attack').textContent = state.enemy.attack;
+    document.getElementById('enemy-defense').textContent = state.enemy.defense;
+
+    // Update battle log
+    const battleLog = document.getElementById('battle-log');
+    battleLog.innerHTML = state.battle_log.map(log => `<p>${log}</p>`).join('');
+    battleLog.scrollTop = battleLog.scrollHeight;
+
+    // Handle battle over state
+    if (state.battle_over) {
+      document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+      const message = state.victory ? 'Victory!' : 'Defeat!';
+      setTimeout(() => {
+        alert(message);
+        window.location.href = '/';
+      }, 1000);
+    }
+  }
+
+  function startBattle() {
+    fetch('/start_battle', {
+      method: 'POST'
+    })
+      .then(response => response.json())
+      .then(updateUI)
+      .catch(error => console.error('Error:', error));
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    startBattle();
+
+    document.querySelectorAll('.action-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        const action = this.dataset.action;
+        fetch('/battle_action', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `action=${action}`
+        })
+          .then(response => response.json())
+          .then(updateUI)
+          .catch(error => console.error('Error:', error));
+      });
+    });
+  });
+</script>
+
+<style>
+  .battle-log {
+    height: 200px;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .battle-log p {
+    margin-bottom: 5px;
+  }
+
+  .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+</style>
+{% endblock %}

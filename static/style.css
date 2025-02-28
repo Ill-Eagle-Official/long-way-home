@@ -1,0 +1,38 @@
+body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.progress {
+    height: 25px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.battle-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.btn {
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+}
+
+.battle-log {
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+} 
