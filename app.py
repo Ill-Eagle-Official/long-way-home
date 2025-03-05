@@ -10,27 +10,39 @@ app.secret_key = os.urandom(24)
 CHARACTERS = {
     'warrior': {
         'name': 'Warrior',
-        'hp': 100,
-        'attack': 15,
-        'defense': 10,
-        'speed': 8,
-        'description': 'A strong melee fighter with high HP and attack power.'
+        'hp': 840,
+        'mp': 56,
+        'strength': 20,
+        'defense': 15,
+        'magic': 5,
+        'magic_defense': 10,
+        'agility': 12,
+        'luck': 15,
+        'description': 'A strong physical fighter with high HP and strength.'
     },
     'mage': {
-        'name': 'Mage',
-        'hp': 70,
-        'attack': 20,
-        'defense': 5,
-        'speed': 7,
-        'description': 'A powerful spellcaster with high attack but low defense.'
+        'name': 'Black Mage',
+        'hp': 572,
+        'mp': 84,
+        'strength': 8,
+        'defense': 8,
+        'magic': 22,
+        'magic_defense': 18,
+        'agility': 10,
+        'luck': 17,
+        'description': 'A powerful spellcaster with high magic and MP.'
     },
     'rogue': {
-        'name': 'Rogue',
-        'hp': 80,
-        'attack': 12,
-        'defense': 7,
-        'speed': 15,
-        'description': 'A quick fighter with high speed and balanced stats.'
+        'name': 'Thief',
+        'hp': 690,
+        'mp': 70,
+        'strength': 15,
+        'defense': 10,
+        'magic': 10,
+        'magic_defense': 12,
+        'agility': 25,
+        'luck': 20,
+        'description': 'An agile fighter with high speed and luck.'
     }
 }
 
@@ -51,9 +63,13 @@ def select_character():
     player = Character(
         char_data['name'],
         char_data['hp'],
-        char_data['attack'],
+        char_data['mp'],
+        char_data['strength'],
         char_data['defense'],
-        char_data['speed']
+        char_data['magic'],
+        char_data['magic_defense'],
+        char_data['agility'],
+        char_data['luck']
     )
     session['player'] = player.to_dict()
     return jsonify({'success': True, 'character': player.to_dict()})

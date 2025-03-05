@@ -10,22 +10,66 @@ class Battle:
 
     def _generate_enemy(self):
         enemy_types = [
-            {'name': 'Goblin', 'hp': 50, 'attack': 8, 'defense': 5, 'speed': 10},
-            {'name': 'Orc', 'hp': 80, 'attack': 12, 'defense': 8, 'speed': 6},
-            {'name': 'Skeleton', 'hp': 40, 'attack': 10, 'defense': 4, 'speed': 8},
-            {'name': 'Dark Elf', 'hp': 60, 'attack': 15, 'defense': 6, 'speed': 12}
+            {
+                'name': 'Dingo',
+                'hp': 250,
+                'mp': 20,
+                'strength': 10,
+                'defense': 5,
+                'magic': 3,
+                'magic_defense': 5,
+                'agility': 8,
+                'luck': 10
+            },
+            {
+                'name': 'Killer Bee',
+                'hp': 180,
+                'mp': 0,
+                'strength': 12,
+                'defense': 2,
+                'magic': 0,
+                'magic_defense': 2,
+                'agility': 15,
+                'luck': 12
+            },
+            {
+                'name': 'Water Flan',
+                'hp': 350,
+                'mp': 40,
+                'strength': 4,
+                'defense': 15,
+                'magic': 15,
+                'magic_defense': 15,
+                'agility': 5,
+                'luck': 8
+            },
+            {
+                'name': 'Condor',
+                'hp': 220,
+                'mp': 10,
+                'strength': 8,
+                'defense': 4,
+                'magic': 2,
+                'magic_defense': 4,
+                'agility': 20,
+                'luck': 15
+            }
         ]
         
         enemy_type = random.choice(enemy_types)
-        # Scale enemy based on player level
-        level_scaling = max(1, self.player.level - 1) * 0.2
+        # Scale enemy based on player level (FFX-style scaling)
+        level_scaling = max(1, self.player.level - 1) * 0.15
         
         return Character(
             enemy_type['name'],
             int(enemy_type['hp'] * (1 + level_scaling)),
-            int(enemy_type['attack'] * (1 + level_scaling)),
+            int(enemy_type['mp'] * (1 + level_scaling)),
+            int(enemy_type['strength'] * (1 + level_scaling)),
             int(enemy_type['defense'] * (1 + level_scaling)),
-            int(enemy_type['speed'] * (1 + level_scaling))
+            int(enemy_type['magic'] * (1 + level_scaling)),
+            int(enemy_type['magic_defense'] * (1 + level_scaling)),
+            int(enemy_type['agility'] * (1 + level_scaling)),
+            int(enemy_type['luck'] * (1 + level_scaling))
         )
 
     def start_battle(self):
