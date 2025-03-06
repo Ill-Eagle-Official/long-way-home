@@ -76,18 +76,20 @@ class Battle:
             dict: Updated battle state after the turn is complete
         """
         # Process player's action
-        self._process_player_action(action)
+        action_success = self._process_player_action(action)
         
-        # If enemy is still alive, process their turn
-        if self.enemy.is_alive() and not self.battle_over:
+        # Only proceed with enemy turn if player's action was successful
+        if action_success and self.enemy.is_alive() and not self.battle_over:
             self._process_enemy_turn()
-        
-        self.turn += 1
+            self.turn += 1
         
         # Check battle end conditions
         self._check_battle_end()
         
-        return self._get_battle_state()
+        # Include action success in battle state
+        battle_state = self._get_battle_state()
+        battle_state['action_success'] = action_success
+        return battle_state
 
     def _process_player_action(self, action):
         """
@@ -95,6 +97,9 @@ class Battle:
         
         Args:
             action (dict): Contains action type and name
+            
+        Returns:
+            bool: Whether the action was successfully executed
         """
         action_type = action.get('type', 'basic')
         action_name = action.get('name', 'attack')
@@ -103,17 +108,21 @@ class Battle:
         if action_type == 'basic':
             if action_name == 'attack':
                 self._handle_attack(self.player, self.enemy)
+                return True
             elif action_name == 'defend':
                 self._handle_defend(self.player)
+                return True
                 
         elif action_type == 'abilities':
-            self._handle_ability(action_name)
+            return self._handle_ability(action_name)
             
         elif action_type == 'skills':
-            self._handle_skill(action_name)
+            return self._handle_skill(action_name)
             
         elif action_type in ['black_magic', 'white_magic']:
-            self._handle_magic(action_name, action_type)
+            return self._handle_magic(action_name, action_type)
+            
+        return True  # Default to true for unknown actions
 
     def _process_enemy_turn(self):
         """
@@ -172,16 +181,21 @@ class Battle:
         
         Args:
             ability_name (str): Name of the ability to use
+            
+        Returns:
+            bool: Whether the ability was successfully used
         """
         if not self.player.use_mp(get_skill_cost(ability_name)):
             self.battle_log.append(f"Not enough MP to use {ability_name}!")
-            return
+            return False
             
         if ability_name == "Cheer":
             self.player.strength += 2
             self.battle_log.append(f"{self.player.name} uses Cheer! Strength increased!")
         elif ability_name == "Provoke":
             # Implement provoke effects
+            self.enemy.defense -= 5
+            self.enemy.strength += 2
             self.battle_log.append(f"{self.player.name} provokes the enemy!")
         elif ability_name == "Steal":
             # Simple steal implementation
@@ -190,6 +204,7 @@ class Battle:
                 self.battle_log.append(f"{self.player.name} successfully steals an item!")
             else:
                 self.battle_log.append(f"{self.player.name}'s steal attempt failed!")
+        return True
 
     def _handle_skill(self, skill_name):
         """
@@ -197,10 +212,13 @@ class Battle:
         
         Args:
             skill_name (str): Name of the skill to use
+            
+        Returns:
+            bool: Whether the skill was successfully used
         """
         if not self.player.use_mp(get_skill_cost(skill_name)):
             self.battle_log.append(f"Not enough MP to use {skill_name}!")
-            return
+            return False
             
         if skill_name == "Power Break":
             self.enemy.strength = max(1, self.enemy.strength - 5)
@@ -218,6 +236,7 @@ class Battle:
                 self.battle_log.append(f"{self.player.name} successfully fled from battle!")
             else:
                 self.battle_log.append(f"{self.player.name}'s attempt to flee failed!")
+        return True
 
     def _handle_magic(self, spell_name, magic_type):
         """
@@ -226,10 +245,13 @@ class Battle:
         Args:
             spell_name (str): Name of the spell to cast
             magic_type (str): Type of magic (black or white)
+            
+        Returns:
+            bool: Whether the spell was successfully cast
         """
         if not self.player.use_mp(get_skill_cost(spell_name)):
             self.battle_log.append(f"Not enough MP to cast {spell_name}!")
-            return
+            return False
             
         if magic_type == 'black_magic':
             result = self.player.calculate_magic_damage(self.enemy, spell_name)
@@ -245,6 +267,7 @@ class Battle:
                 heal_amount = int(self.player.magic * 1.5)
                 self.player.heal(heal_amount)
                 self.battle_log.append(f"{self.player.name} casts Cure and recovers {heal_amount} HP!")
+        return True
 
     def _check_battle_end(self):
         """

@@ -198,48 +198,43 @@
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        type: type,
-        name: name
-      })
+      body: JSON.stringify({ type: type, name: name })
     })
-      .then(response => {
-        // Check if the response is JSON
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          return response.json();
-        }
-        // If not JSON, it might be a redirect or other response
-        throw new Error('Invalid response type');
-      })
+      .then(response => response.json())
       .then(data => {
         if (data.error) {
           alert(data.error);
           return;
         }
 
-        // Update the UI with the new battle state
         updateUI(data);
 
-        // If battle is over, handle the end state
-        if (data.battle_over) {
-          const message = data.victory ? 'Victory!' : 'Defeat!';
-          // Disable all buttons
-          document.querySelectorAll('button').forEach(btn => btn.disabled = true);
-          // Show result and return to character selection after a delay
+        // If action failed (e.g., not enough MP), don't hide the menus
+        if (!data.action_success) {
+          return;
+        }
+
+        // Hide all menus only if action was successful
+        document.querySelectorAll('.sub-menu, #main_menu').forEach(menu => menu.classList.add('d-none'));
+
+        // Show main menu after a short delay (unless battle is over)
+        if (!data.battle_over) {
           setTimeout(() => {
-            alert(message);
-            window.location.href = '/';
-          }, 1000);
-        } else {
-          // If battle continues, return to main menu
-          showActionMenu('main');
+            showActionMenu('main');
+          }, 100);
+        }
+
+        // Show game over message if battle is over
+        if (data.battle_over) {
+          const message = data.victory ?
+            "Victory! You have won the battle!" :
+            "Defeat! You have been defeated...";
+          setTimeout(() => alert(message), 100);
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        // If there's an error, redirect to the home page
-        window.location.href = '/';
+        alert('An error occurred during battle');
       });
   }
 
