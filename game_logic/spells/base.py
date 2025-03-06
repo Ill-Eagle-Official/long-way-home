@@ -22,6 +22,7 @@ class Status(Enum):
     SLEEP = "sleep"    # Cannot act
     HASTE = "haste"    # Increased speed
     SLOW = "slow"      # Decreased speed
+    REGEN = "regen"    # Heals HP over time
 
 @dataclass
 class StatusEffect:
@@ -96,6 +97,8 @@ class Spell:
                 messages.append(f"{target.name}'s {stat} {'increased' if change > 0 else 'decreased'} by {abs(change)}!")
                 
         return messages
+    
+# Black Magic Spells subclass
 
 class BlackMagicSpell(Spell):
     """Base class for all black magic spells with standardized damage calculation"""
@@ -141,3 +144,30 @@ class BlackMagicSpell(Spell):
         final_damage = max(final_damage, 0)  # Ensure damage isn't negative
         
         return SpellEffect(damage=final_damage) 
+    
+# White Magic Spells subclass
+class WhiteMagicSpell(Spell):
+    """Base class for all white magic spells with standardized healing calculation"""
+    
+    def __init__(
+        self,
+        name: str,
+        mp_cost: int,
+        base_healing: int,
+        description: str = "",
+        targeting: str = "ally"
+    ):
+        super().__init__(
+            name=name,
+            mp_cost=mp_cost,
+            spell_type=SpellType.WHITE_MAGIC,
+            base_healing=base_healing,
+            description=description,
+            targeting=targeting
+        )   
+
+    def calculate_effect(self, caster) -> SpellEffect:
+        """Calculate healing amount based on caster's magic stat"""
+        raw_healing = self.base_healing * ([caster.magic + self.base_healing] / 2)
+        return SpellEffect(healing=raw_healing)
+    

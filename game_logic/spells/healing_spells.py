@@ -1,63 +1,81 @@
 """
-Healing-base spell implementation.
+Healing-based spell implementations.
 """
 
 import random
-from .base import Spell, SpellType, SpellEffect
+from .base import WhiteMagicSpell, SpellEffect, Status, StatusEffect
 
-class HealingSpell(Spell):
-    """Base class for healing spells"""
-
+class CureSpell(WhiteMagicSpell):
+    """Base class for cure-type healing spells with regen effect"""
+    
     def __init__(
         self,
         name: str,
         mp_cost: int,
         base_healing: int,
-        description: str
+        regen_chance: float = 0.0,
+        regen_potency: int = 0,
+        description: str = ""
     ):
         super().__init__(
             name=name,
             mp_cost=mp_cost,
-            spell_type=SpellType.WHITE_MAGIC,
-            base_power=base_healing,
+            base_healing=base_healing,
             description=description,
-            targeting="ally")
-        
-    def calculate_effect(self, caster) -> SpellEffect:
-        """Calculate healing amount based on caster's magic stat"""
-        raw_healing = self.base_healing + ([caster.magic**2 / 6] + self.base_healing) + 4
-        final_healing = int(raw_healing * (0.8 + (0.4 * random.random())))
+            targeting="ally"  # Healing spells target allies by default
+        )
+        self.regen_chance = regen_chance
+        self.regen_potency = regen_potency
 
-        return SpellEffect(healing=final_healing)
-    
-class Cure(HealingSpell):
+    def calculate_effect(self, caster) -> SpellEffect:
+        """Calculate healing amount and potential regen effect"""
+        # Get the base healing calculation from WhiteMagicSpell
+        effect = super().calculate_effect(caster)
+        
+        # Add regeneration status effect if applicable
+        if self.regen_chance > 0:
+            regen_effect = StatusEffect(
+                status=Status.REGEN,
+                duration=3,  # Lasts 3 turns
+                potency=self.regen_potency,
+                chance=self.regen_chance
+            )
+            effect.status_effects.append(regen_effect)
+        
+        return effect
+
+class Cure(CureSpell):
     """Basic healing spell"""
     def __init__(self):
         super().__init__(
             name="Cure",
             mp_cost=4,
-            base_healing=24,
-            description="Minor heal for one ally."
+            base_healing=30,
+            description="Restores a small amount of HP"
         )
 
-class Cura(HealingSpell):
-    """Mid-level healing spell"""
+class Cura(CureSpell):
+    """Medium-tier healing spell"""
     def __init__(self):
         super().__init__(
             name="Cura",
             mp_cost=10,
-            base_healing=40,
-            description="Heal one ally with moderate healing."
+            base_healing=65,
+            regen_chance=0.25,  # 25% chance to apply regen
+            regen_potency=5,    # Heals 5 HP per turn if regen applies
+            description="Restores moderate HP with a chance to apply regeneration"
         )
-        
-class Curaga(HealingSpell):
-    """Heal all allies"""
+
+class Curaga(CureSpell):
+    """High-tier healing spell"""
     def __init__(self):
         super().__init__(
             name="Curaga",
             mp_cost=20,
-            base_healing=80,
-            description="Heal all allies with high healing."
+            base_healing=120,
+            regen_chance=0.4,   # 40% chance to apply regen
+            regen_potency=10,   # Heals 10 HP per turn if regen applies
+            description="Restores significant HP with a high chance to apply regeneration"
         )
         
         
