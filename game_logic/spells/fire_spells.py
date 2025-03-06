@@ -3,9 +3,9 @@ Fire-based spell implementations.
 """
 
 import random
-from .base import Spell, SpellType, SpellEffect, Status, StatusEffect
+from .base import BlackMagicSpell, SpellEffect, Status, StatusEffect
 
-class FireSpell(Spell):
+class FireSpell(BlackMagicSpell):
     """Base class for fire-element spells with burn effect"""
     
     def __init__(
@@ -20,7 +20,6 @@ class FireSpell(Spell):
         super().__init__(
             name=name,
             mp_cost=mp_cost,
-            spell_type=SpellType.BLACK_MAGIC,
             base_power=base_power,
             description=description,
             targeting="enemy"
@@ -30,12 +29,10 @@ class FireSpell(Spell):
 
     def calculate_effect(self, caster, target) -> SpellEffect:
         """Calculate fire damage and potential burn effect"""
-        # Calculate base magic damage
-        raw_damage = (self.base_power * caster.magic) / target.magic_defense
-        # Add some randomness (±10%)
-        final_damage = int(raw_damage * (0.9 + (0.2 * random.random())))
+        # Get the base damage calculation from BlackMagicSpell
+        effect = super().calculate_effect(caster, target)
         
-        # Create burn status effect
+        # Add burn status effect
         burn_effect = StatusEffect(
             status=Status.BURN,
             duration=3,  # Lasts 3 turns
@@ -43,11 +40,10 @@ class FireSpell(Spell):
             chance=self.burn_chance
         )
         
-        return SpellEffect(
-            damage=final_damage,
-            status_effects=[burn_effect]
-        )
+        effect.status_effects.append(burn_effect)
+        return effect
 
+# Different tiers of fire spells
 class Fire(FireSpell):
     """Basic fire spell"""
     def __init__(self):

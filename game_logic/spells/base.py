@@ -95,4 +95,49 @@ class Spell:
                 setattr(target, stat, getattr(target, stat) + change)
                 messages.append(f"{target.name}'s {stat} {'increased' if change > 0 else 'decreased'} by {abs(change)}!")
                 
-        return messages 
+        return messages
+
+class BlackMagicSpell(Spell):
+    """Base class for all black magic spells with standardized damage calculation"""
+    
+    def __init__(
+        self,
+        name: str,
+        mp_cost: int,
+        base_power: int,
+        description: str = "",
+        targeting: str = "enemy"
+    ):
+        super().__init__(
+            name=name,
+            mp_cost=mp_cost,
+            spell_type=SpellType.BLACK_MAGIC,
+            base_power=base_power,
+            description=description,
+            targeting=targeting
+        )
+
+    def calculate_effect(self, caster, target) -> SpellEffect:
+        """
+        Implements the standard black magic damage calculation formula.
+        All black magic spells will use this formula unless overridden.
+        """
+        # Calculate base magic damage
+        raw_damage = self.base_power * ((caster.magic**2 / 6) + self.base_power) + 4
+        if raw_damage > 99999:
+            raw_damage = 99999
+
+        # calculate MDefNum
+        mdefnum = ((target.magic_defense - 280.4)**2 / 110) + 16
+
+        # calculate base damage for final calculation
+        base_damage = (raw_damage * mdefnum) / 730
+
+        # calculate final damage
+        final_damage = base_damage * (730 - (mdefnum * 51 - target.magic_defense**2 / 11) / 10) / 730
+
+        # ensure damage is a whole number and capped
+        final_damage = min(int(final_damage), 99999)
+        final_damage = max(final_damage, 0)  # Ensure damage isn't negative
+        
+        return SpellEffect(damage=final_damage) 
