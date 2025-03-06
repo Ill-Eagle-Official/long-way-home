@@ -4,40 +4,56 @@
 <div class="row justify-content-center">
   <div class="col-md-8">
     <div class="battle-container">
-      <!-- Character Stats -->
+      <!-- Character Stats Section -->
       <div class="row mb-4">
+        <!-- Player Character Stats Card -->
         <div class="col-md-6">
           <div class="card bg-secondary">
             <div class="card-body">
               <h5 class="card-title">{{ player.name }}</h5>
+              <!-- HP Bar with current/max values -->
               <div class="progress mb-2">
                 <div class="progress-bar bg-success" role="progressbar" id="player-hp-bar" style="width: 100%;"
                   aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
                   HP: <span id="player-hp">{{ player.current_hp }}</span>/{{ player.max_hp }}
                 </div>
               </div>
+              <!-- MP Bar with current/max values -->
+              <div class="progress mb-2">
+                <div class="progress-bar bg-info" role="progressbar" id="player-mp-bar" style="width: 100%;"
+                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                  MP: <span id="player-mp">{{ player.current_mp }}</span>/{{ player.max_mp }}
+                </div>
+              </div>
+              <!-- Character Level and Stats Display -->
               <p>Level: {{ player.level }} (EXP: {{ player.experience }}/100)</p>
-              <p>Attack: {{ player.attack }} | Defense: {{ player.defense }} | Speed: {{ player.speed }}</p>
+              <p>Strength: {{ player.strength }} | Defense: {{ player.defense }}</p>
+              <p>Magic: {{ player.magic }} | Magic Def: {{ player.magic_defense }}</p>
+              <p>Agility: {{ player.agility }} | Luck: {{ player.luck }}</p>
             </div>
           </div>
         </div>
+        <!-- Enemy Stats Card -->
         <div class="col-md-6">
           <div class="card bg-danger">
             <div class="card-body">
               <h5 class="card-title" id="enemy-name"></h5>
+              <!-- Enemy HP Bar -->
               <div class="progress mb-2">
                 <div class="progress-bar bg-success" role="progressbar" id="enemy-hp-bar" style="width: 100%;"
                   aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
                   HP: <span id="enemy-hp"></span>/<span id="enemy-max-hp"></span>
                 </div>
               </div>
-              <p>Attack: <span id="enemy-attack"></span> | Defense: <span id="enemy-defense"></span></p>
+              <!-- Enemy Stats Display -->
+              <p>Strength: <span id="enemy-strength"></span> | Defense: <span id="enemy-defense"></span></p>
+              <p>Magic: <span id="enemy-magic"></span> | M.Def: <span id="enemy-magic-defense"></span></p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Battle Log -->
+      <!-- Battle Log Section - Displays combat actions and results -->
       <div class="card bg-dark mb-4">
         <div class="card-body">
           <h5 class="card-title">Battle Log</h5>
@@ -45,11 +61,60 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="d-flex justify-content-center gap-2">
-        <button class="btn btn-primary action-btn" data-action="attack">Attack</button>
-        <button class="btn btn-secondary action-btn" data-action="defend">Defend</button>
-        <button class="btn btn-success action-btn" data-action="heal">Heal</button>
+      <!-- Combat Action Menu System -->
+      <div class="action-menu">
+        <!-- Main Menu - Primary action categories -->
+        <div id="main_menu" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+          <!-- Direct actions that don't need submenus -->
+          <button class="btn btn-primary" onclick="performAction('basic', 'attack')">Attack</button>
+          <!-- Category buttons that open submenus -->
+          <button class="btn btn-info" onclick="showActionMenu('abilities')">Abilities</button>
+          <button class="btn btn-warning" onclick="showActionMenu('skills')">Skills</button>
+          <button class="btn btn-danger" onclick="showActionMenu('black_magic')">Black Magic</button>
+          <button class="btn btn-success" onclick="showActionMenu('white_magic')">White Magic</button>
+          <button class="btn btn-secondary" onclick="performAction('basic', 'defend')">Defend</button>
+        </div>
+
+        <!-- Submenu Sections -->
+        <!-- Special Abilities Submenu -->
+        <div id="abilities_menu" class="sub-menu d-none">
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+            {% for ability in player.abilities %}
+            <button class="btn btn-info" onclick="performAction('abilities', '{{ ability }}')">{{ ability }}</button>
+            {% endfor %}
+            <button class="btn btn-secondary" onclick="showActionMenu('main')">Back</button>
+          </div>
+        </div>
+
+        <!-- Combat Skills Submenu -->
+        <div id="skills_menu" class="sub-menu d-none">
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+            {% for skill in player.skills %}
+            <button class="btn btn-warning" onclick="performAction('skills', '{{ skill }}')">{{ skill }}</button>
+            {% endfor %}
+            <button class="btn btn-secondary" onclick="showActionMenu('main')">Back</button>
+          </div>
+        </div>
+
+        <!-- Offensive Magic Submenu -->
+        <div id="black_magic_menu" class="sub-menu d-none">
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+            {% for spell in player.black_magic %}
+            <button class="btn btn-danger" onclick="performAction('black_magic', '{{ spell }}')">{{ spell }}</button>
+            {% endfor %}
+            <button class="btn btn-secondary" onclick="showActionMenu('main')">Back</button>
+          </div>
+        </div>
+
+        <!-- Healing/Support Magic Submenu -->
+        <div id="white_magic_menu" class="sub-menu d-none">
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+            {% for spell in player.white_magic %}
+            <button class="btn btn-success" onclick="performAction('white_magic', '{{ spell }}')">{{ spell }}</button>
+            {% endfor %}
+            <button class="btn btn-secondary" onclick="showActionMenu('main')">Back</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -58,34 +123,46 @@
 
 {% block scripts %}
 <script>
+  // Stores the current state of the battle
   let battleState = null;
 
+  /**
+   * Updates the UI with the latest battle state
+   * @param {Object} state - The current battle state including player and enemy information
+   */
   function updateUI(state) {
     battleState = state;
 
-    // Update player stats
+    // Update player stats and status bars
     document.getElementById('player-hp').textContent = state.player.current_hp;
+    document.getElementById('player-mp').textContent = state.player.current_mp;
     const playerHpPercent = (state.player.current_hp / state.player.max_hp) * 100;
+    const playerMpPercent = (state.player.current_mp / state.player.max_mp) * 100;
     document.getElementById('player-hp-bar').style.width = `${playerHpPercent}%`;
+    document.getElementById('player-mp-bar').style.width = `${playerMpPercent}%`;
 
-    // Update enemy stats
+    // Update enemy information and status
     document.getElementById('enemy-name').textContent = state.enemy.name;
     document.getElementById('enemy-hp').textContent = state.enemy.current_hp;
     document.getElementById('enemy-max-hp').textContent = state.enemy.max_hp;
+    document.getElementById('enemy-strength').textContent = state.enemy.strength;
+    document.getElementById('enemy-defense').textContent = state.enemy.defense;
+    document.getElementById('enemy-magic').textContent = state.enemy.magic;
+    document.getElementById('enemy-magic-defense').textContent = state.enemy.magic_defense;
     const enemyHpPercent = (state.enemy.current_hp / state.enemy.max_hp) * 100;
     document.getElementById('enemy-hp-bar').style.width = `${enemyHpPercent}%`;
-    document.getElementById('enemy-attack').textContent = state.enemy.attack;
-    document.getElementById('enemy-defense').textContent = state.enemy.defense;
 
-    // Update battle log
+    // Update the battle log with latest actions
     const battleLog = document.getElementById('battle-log');
     battleLog.innerHTML = state.battle_log.map(log => `<p>${log}</p>`).join('');
-    battleLog.scrollTop = battleLog.scrollHeight;
+    battleLog.scrollTop = battleLog.scrollHeight;  // Auto-scroll to latest entries
 
-    // Handle battle over state
+    // Handle end of battle conditions
     if (state.battle_over) {
-      document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+      // Disable all buttons when battle ends
+      document.querySelectorAll('button').forEach(btn => btn.disabled = true);
       const message = state.victory ? 'Victory!' : 'Defeat!';
+      // Show result and return to character selection
       setTimeout(() => {
         alert(message);
         window.location.href = '/';
@@ -93,6 +170,82 @@
     }
   }
 
+  /**
+   * Handles showing/hiding action menus
+   * @param {string} menuType - The type of menu to display ('main' or specific submenu)
+   */
+  function showActionMenu(menuType) {
+    // Hide all submenus first
+    document.querySelectorAll('.sub-menu').forEach(menu => menu.classList.add('d-none'));
+
+    // Show either main menu or specific submenu
+    if (menuType === 'main') {
+      document.getElementById('main_menu').classList.remove('d-none');
+    } else {
+      document.getElementById('main_menu').classList.add('d-none');
+      document.getElementById(`${menuType}_menu`).classList.remove('d-none');
+    }
+  }
+
+  /**
+   * Performs a battle action and sends it to the server
+   * @param {string} type - The type of action (basic, abilities, skills, etc.)
+   * @param {string} name - The specific action name
+   */
+  function performAction(type, name) {
+    fetch('/battle_action', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: type,
+        name: name
+      })
+    })
+      .then(response => {
+        // Check if the response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return response.json();
+        }
+        // If not JSON, it might be a redirect or other response
+        throw new Error('Invalid response type');
+      })
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        // Update the UI with the new battle state
+        updateUI(data);
+
+        // If battle is over, handle the end state
+        if (data.battle_over) {
+          const message = data.victory ? 'Victory!' : 'Defeat!';
+          // Disable all buttons
+          document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+          // Show result and return to character selection after a delay
+          setTimeout(() => {
+            alert(message);
+            window.location.href = '/';
+          }, 1000);
+        } else {
+          // If battle continues, return to main menu
+          showActionMenu('main');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        // If there's an error, redirect to the home page
+        window.location.href = '/';
+      });
+  }
+
+  /**
+   * Initializes a new battle when the page loads
+   */
   function startBattle() {
     fetch('/start_battle', {
       method: 'POST'
@@ -102,28 +255,15 @@
       .catch(error => console.error('Error:', error));
   }
 
+  // Initialize the battle when the page loads
   document.addEventListener('DOMContentLoaded', function () {
     startBattle();
-
-    document.querySelectorAll('.action-btn').forEach(button => {
-      button.addEventListener('click', function () {
-        const action = this.dataset.action;
-        fetch('/battle_action', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `action=${action}`
-        })
-          .then(response => response.json())
-          .then(updateUI)
-          .catch(error => console.error('Error:', error));
-      });
-    });
+    showActionMenu('main');
   });
 </script>
 
 <style>
+  /* Battle log styling */
   .battle-log {
     height: 200px;
     overflow-y: auto;
@@ -136,9 +276,22 @@
     margin-bottom: 5px;
   }
 
+  /* Card styling */
   .card {
     border: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Action button styling */
+  .action-menu button {
+    min-width: 120px;
+  }
+
+  /* Submenu styling */
+  .sub-menu {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 5px;
   }
 </style>
 {% endblock %}

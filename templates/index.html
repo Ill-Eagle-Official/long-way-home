@@ -13,9 +13,12 @@
             <p class="card-text">{{ char.description }}</p>
             <ul class="list-unstyled">
               <li>HP: {{ char.hp }}</li>
-              <li>Attack: {{ char.attack }}</li>
+              <li>Strength: {{ char.strength}}</li>
               <li>Defense: {{ char.defense }}</li>
-              <li>Speed: {{ char.speed }}</li>
+              <li>Agility: {{ char.agility }}</li>
+              <li>Magic: {{ char.magic }}</li>
+              <li>Magic Defense: {{ char.magic_defense }}</li>
+              <li>Luck: {{ char.luck }}</li>
             </ul>
             <button class="btn btn-primary select-character" data-character="{{ char_id }}">
               Select {{ char.name }}
