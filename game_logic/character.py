@@ -1,3 +1,5 @@
+from .skills import get_skill_cost, get_spell_power, get_special_move_power
+
 class Character:
     """
     Represents a character in the game (either player or enemy).
@@ -78,21 +80,20 @@ class Character:
             return True
         return False
     
-    def calculate_magic_damage(self, target, spell_power):
+    def calculate_magic_damage(self, target, spell_name):
         """
         Calculate magical damage using FFX's formula.
         
         Args:
             target (Character): The target of the spell
-            spell_power (int): Base power of the spell
+            spell_name (str): Name of the spell to cast
             
         Returns:
             dict: Contains damage amount and whether it was a critical hit
         """
         import random
-        # FFX's magic damage formula:
-        # [(Magic * 0.8 + Magic_Power * 0.5) * (Random + 1.0) * Modifier] - Magic_Defense * 0.875
         
+        spell_power = get_spell_power(spell_name)
         base_damage = (self.magic * 0.8 + spell_power * 0.5)
         random_factor = random.uniform(0, 0.25)
         
@@ -133,12 +134,7 @@ class Character:
         Returns:
             bool: True if the ability can be used
         """
-        costs = {
-            'Cheer': 0,
-            'Provoke': 0,
-            'Steal': 0
-        }
-        return self.current_mp >= costs.get(ability, 0)
+        return self.current_mp >= get_skill_cost(ability)
     
     def _can_use_skill(self, skill):
         """
@@ -150,13 +146,7 @@ class Character:
         Returns:
             bool: True if the skill can be used
         """
-        costs = {
-            'Power Break': 10,
-            'Armor Break': 10,
-            'Dark Attack': 8,
-            'Flee': 4
-        }
-        return self.current_mp >= costs.get(skill, 0)
+        return self.current_mp >= get_skill_cost(skill)
     
     def _can_use_spell(self, spell):
         """
@@ -168,13 +158,7 @@ class Character:
         Returns:
             bool: True if the spell can be used
         """
-        costs = {
-            'Fire': 4,
-            'Thunder': 4,
-            'Blizzard': 4,
-            'Cure': 4
-        }
-        return self.current_mp >= costs.get(spell, 0)
+        return self.current_mp >= get_skill_cost(spell)
 
     def take_damage(self, damage):
         """
@@ -207,21 +191,18 @@ class Character:
         """
         self.current_hp = min(self.max_hp, self.current_hp + amount)
 
-    def calculate_damage(self, target):
+    def calculate_damage(self, target, is_special_move=False):
         """
         Calculate physical damage using FFX's formula.
         
         Args:
             target (Character): The target of the attack
+            is_special_move (bool): Whether this is a special move attack
             
         Returns:
             dict: Contains damage amount and whether it was a critical hit
         """
         import random
-        
-        # FFX's physical damage formula:
-        # [(Strength * 0.8 + Level * 0.5) * (Random + 1) * Modifier] - Defense * 0.875
-        # where Random is between 0 and 0.25
         
         base_damage = (self.strength * 0.8 + self.level * 0.5)
         random_factor = random.uniform(0, 0.25)
@@ -231,6 +212,10 @@ class Character:
         is_critical = random.random() < crit_chance
         
         modifier = 1.5 if is_critical else 1.0
+        
+        # Add special move multiplier if applicable
+        if is_special_move and self.special_move:
+            modifier *= get_special_move_power(self.special_move)
         
         # Add weapon bonus (simplified to level-based bonus)
         weapon_bonus = self.level * 0.1

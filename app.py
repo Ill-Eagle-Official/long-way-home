@@ -1,50 +1,11 @@
 from flask import Flask, render_template, jsonify, request, session
 from game_logic.character import Character
 from game_logic.battle import Battle
+from game_logic.character_templates import CHARACTER_TEMPLATES
 import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-
-# Available character classes
-CHARACTERS = {
-    'warrior': {
-        'name': 'Warrior',
-        'hp': 840,
-        'mp': 56,
-        'strength': 20,
-        'defense': 15,
-        'magic': 5,
-        'magic_defense': 10,
-        'agility': 12,
-        'luck': 15,
-        'description': 'A strong physical fighter with high HP and strength.'
-    },
-    'mage': {
-        'name': 'Black Mage',
-        'hp': 572,
-        'mp': 84,
-        'strength': 8,
-        'defense': 8,
-        'magic': 22,
-        'magic_defense': 18,
-        'agility': 10,
-        'luck': 17,
-        'description': 'A powerful spellcaster with high magic and MP.'
-    },
-    'rogue': {
-        'name': 'Thief',
-        'hp': 690,
-        'mp': 70,
-        'strength': 15,
-        'defense': 10,
-        'magic': 10,
-        'magic_defense': 12,
-        'agility': 25,
-        'luck': 20,
-        'description': 'An agile fighter with high speed and luck.'
-    }
-}
 
 @app.route('/')
 def index():
@@ -55,7 +16,7 @@ def index():
     # Clear any existing battle state when returning to character selection
     if 'battle_state' in session:
         del session['battle_state']
-    return render_template('index.html', characters=CHARACTERS)
+    return render_template('index.html', characters=CHARACTER_TEMPLATES)
 
 @app.route('/select_character', methods=['POST'])
 def select_character():
@@ -67,10 +28,10 @@ def select_character():
         redirect: Redirects to battle page after character creation
     """
     character_type = request.form.get('character_type')
-    if character_type not in CHARACTERS:
+    if character_type not in CHARACTER_TEMPLATES:
         return jsonify({'error': 'Invalid character type'}), 400
     
-    char_data = CHARACTERS[character_type]
+    char_data = CHARACTER_TEMPLATES[character_type]
     player = Character(
         char_data['name'],
         char_data['hp'],
@@ -82,6 +43,13 @@ def select_character():
         char_data['agility'],
         char_data['luck']
     )
+    
+    # Set abilities from template
+    player.abilities = char_data['abilities']
+    player.skills = char_data['skills']
+    player.black_magic = char_data['black_magic']
+    player.white_magic = char_data['white_magic']
+    
     session['player'] = player.to_dict()
     return jsonify({'success': True, 'character': player.to_dict()})
 

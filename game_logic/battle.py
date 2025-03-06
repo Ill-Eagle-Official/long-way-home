@@ -1,6 +1,7 @@
 import random
 from .character import Character
 from .enemy_database import get_random_enemy
+from .skills import get_skill_cost, get_spell_power
 
 class Battle:
     """
@@ -123,14 +124,11 @@ class Battle:
         # Enemy AI: More likely to use special moves when HP is low
         hp_percent = (self.enemy.current_hp / self.enemy.max_hp) * 100
         
-        if hp_percent < 30 and random.random() < 0.4:
+        if hp_percent < 30 and random.random() < 0.4 and self.enemy.special_move:
             # Use special move when low on HP
-            special_move = self.enemy.special_move
-            damage_mult = 1.5
-            result = self.enemy.calculate_damage(self.player)
-            damage = int(result['damage'] * damage_mult)
-            self.player.take_damage(damage)
-            self.battle_log.append(f"{self.enemy.name} uses {special_move} for {damage} damage!")
+            result = self.enemy.calculate_damage(self.player, is_special_move=True)
+            damage = self.player.take_damage(result['damage'])
+            self.battle_log.append(f"{self.enemy.name} uses {self.enemy.special_move} for {damage} damage!")
             return
         
         # Default to basic attack
@@ -146,6 +144,11 @@ class Battle:
         """
         result = attacker.calculate_damage(target)
         damage = target.take_damage(result['damage'])
+        
+        # Debug logging
+        if isinstance(target, Character) and target == self.enemy:
+            print(f"Enemy HP after damage: {target.current_hp}/{target.max_hp}")
+            print(f"Enemy alive status: {target.is_alive()}")
         
         # Create battle log message
         msg = f"{attacker.name} attacks {target.name} for {damage} damage!"
@@ -170,6 +173,10 @@ class Battle:
         Args:
             ability_name (str): Name of the ability to use
         """
+        if not self.player.use_mp(get_skill_cost(ability_name)):
+            self.battle_log.append(f"Not enough MP to use {ability_name}!")
+            return
+            
         if ability_name == "Cheer":
             self.player.strength += 2
             self.battle_log.append(f"{self.player.name} uses Cheer! Strength increased!")
@@ -191,14 +198,7 @@ class Battle:
         Args:
             skill_name (str): Name of the skill to use
         """
-        mp_cost = {
-            'Power Break': 10,
-            'Armor Break': 10,
-            'Dark Attack': 8,
-            'Flee': 4
-        }
-        
-        if not self.player.use_mp(mp_cost.get(skill_name, 0)):
+        if not self.player.use_mp(get_skill_cost(skill_name)):
             self.battle_log.append(f"Not enough MP to use {skill_name}!")
             return
             
@@ -227,20 +227,12 @@ class Battle:
             spell_name (str): Name of the spell to cast
             magic_type (str): Type of magic (black or white)
         """
-        mp_cost = 4  # Base MP cost for spells
-        
-        if not self.player.use_mp(mp_cost):
+        if not self.player.use_mp(get_skill_cost(spell_name)):
             self.battle_log.append(f"Not enough MP to cast {spell_name}!")
             return
             
         if magic_type == 'black_magic':
-            spell_power = {
-                'Fire': 20,
-                'Thunder': 20,
-                'Blizzard': 20
-            }.get(spell_name, 0)
-            
-            result = self.player.calculate_magic_damage(self.enemy, spell_power)
+            result = self.player.calculate_magic_damage(self.enemy, spell_name)
             damage = self.enemy.take_damage(result['damage'])
             
             msg = f"{self.player.name} casts {spell_name} for {damage} damage!"
@@ -278,11 +270,6 @@ class Battle:
             self.player.gain_experience(exp_gain)
             self.battle_log.append(f"{self.enemy.name} has been defeated!")
             self.battle_log.append(f"{self.player.name} gains {exp_gain} experience!")
-            
-            # Future implementation: Handle item drops
-            # if random.random() < drop_chance:
-            #     dropped_item = random.choice(self.enemy.drops)
-            #     self.battle_log.append(f"The enemy dropped a {dropped_item}!")
 
     def _get_battle_state(self):
         """
