@@ -45,6 +45,8 @@ class CureSpell(WhiteMagicSpell):
             effect.status_effects.append(regen_effect)
         
         return effect
+    
+# HEALING SPELLS
 
 class Cure(CureSpell):
     """Basic healing spell"""
@@ -79,5 +81,190 @@ class Curaga(CureSpell):
             regen_percent=0.10,    # Heals 10% of max HP per turn
             description="Restores significant HP with a chance to regenerate 10% HP per turn"
         )
+
+# REGEN SPELLS
         
-        
+class Regen(CureSpell):
+    """Applies the regen status effect to the target"""
+    def __init__(self):
+        super().__init__(
+            name="Regen",
+            mp_cost=25,
+            regen_chance=1.0,
+            regen_percent=0.10,
+            description="Applies the regen status effect to the target, which heals 10% max HP per turn"
+        )
+
+class HighRegen(CureSpell):
+    """Applies the high regen status effect to the target"""
+    def __init__(self):
+        super().__init__(
+            name="High Regen",
+            mp_cost=35,
+            regen_chance=1.0,
+            regen_percent=0.20,
+            description="Applies the high regen status effect to the target, which heals 20% max HP per turn"
+        )
+
+class MassRegen(CureSpell):
+    """Applies the regen status effect to all allies"""
+    def __init__(self):
+        super().__init__(
+            name="Mass Regen",
+            mp_cost=80,
+            regen_chance=1.0,
+            regen_percent=0.20,
+            description="Applies the high regen status effect to all allies, which heals 20% max HP per turn"
+        )
+
+# NULLIFY SPELLS
+
+class NulBlaze(WhiteMagicSpell):
+    """Nullifies one instance of fire damage"""
+    def __init__(self):
+        super().__init__(
+            name="Nul Blaze",
+            mp_cost=10,
+            base_healing=0,
+            description="Nullifies one instance of fire damage"
+        )
+
+class NulFrost(WhiteMagicSpell):
+    """Nullifies one instance of frost damage"""
+    def __init__(self):
+        super().__init__(
+            name="Nul Frost",
+            mp_cost=10,
+            base_healing=0,
+            description="Nullifies one instance of frost damage"
+        )
+
+class NulThunder(WhiteMagicSpell):
+    """Nullifies one instance of thunder damage"""
+    def __init__(self):
+        super().__init__(
+            name="Nul Thunder",
+            
+        )
+
+class NulWater(WhiteMagicSpell):
+    """Nullifies one instance of water damage"""
+    def __init__(self):
+        super().__init__(
+            name="Nul Water",
+            mp_cost=10,
+            base_healing=0,
+            description="Nullifies one instance of water damage"
+        )
+
+# STATUS CURE SPELLS
+
+class Esuna(WhiteMagicSpell):
+    """Cures all status effects from the target"""
+    def __init__(self):
+        super().__init__(
+            name="Esuna",
+            mp_cost=5
+            
+        )
+
+class Revive(WhiteMagicSpell):
+    """Revives the target from death"""
+    def __init__(self):
+        super().__init__(
+            name="Revive",
+            mp_cost=18
+            
+        )
+
+class MassRevive(WhiteMagicSpell):
+    """Revives all allies from death"""
+    def __init__(self):
+        super().__init__(
+            name="Mass Revive",
+            mp_cost=60
+            
+        )
+
+class Dispel(WhiteMagicSpell):
+    """Removes all status effects from the target"""
+    def __init__(self):
+        super().__init__(
+            name="Dispel",
+            mp_cost=12
+        )
+
+class MassDispel(WhiteMagicSpell):
+    """Removes all status effects from all allies"""
+    def __init__(self):
+        super().__init__(
+            name="Mass Dispel",
+            mp_cost=35
+        )
+
+# BUFF/DEBUFF SPELLS
+
+class Haste(WhiteMagicSpell):
+    """Increases the speed of the target"""
+    def __init__(self):
+        super().__init__(
+            name="Haste",
+            mp_cost=8
+        )
+
+class MassHaste(WhiteMagicSpell):
+    """Increases the speed of all allies"""
+    def __init__(self):
+        super().__init__(
+            name="Mass Haste",
+            mp_cost=30
+        )
+
+class Slow(WhiteMagicSpell):
+    """Decreases the speed of the target"""
+    def __init__(self):
+        super().__init__(
+            name="Slow",
+            mp_cost=8
+        )
+
+class MassSlow(WhiteMagicSpell):
+    """Decreases the speed of all enemies"""
+    def __init__(self):
+        super().__init__(
+            name="Mass Slow",
+            mp_cost=30
+        )
+
+class Shell(WhiteMagicSpell):
+    """Halves magic damage applied to the target"""
+    def __init__(self):
+        super().__init__(
+            name="Shell",
+            mp_cost=10,
+        )
+
+class Protect(WhiteMagicSpell):
+    """Halves physical damage applied to the target"""
+    def __init__(self):
+        super().__init__(
+            name="Protect",
+            mp_cost=10
+        )
+
+class Reflect(WhiteMagicSpell):
+    """Reflects magic damage back to the caster"""
+    def __init__(self):
+        super().__init__(
+            name="Reflect",
+            mp_cost=14            
+        )
+
+class Barrier(WhiteMagicSpell):
+    """Blocks physical damage from the target"""
+    def __init__(self):
+        super().__init__(
+            name="Barrier",
+            mp_cost=14 
+        )
+
