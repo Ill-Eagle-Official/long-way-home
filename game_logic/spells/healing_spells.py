@@ -14,7 +14,7 @@ class CureSpell(WhiteMagicSpell):
         mp_cost: int,
         base_healing: int,
         regen_chance: float = 0.0,
-        regen_potency: int = 0,
+        regen_percent: float = 0.0,  # Percentage of max HP to heal per turn
         description: str = ""
     ):
         super().__init__(
@@ -25,7 +25,7 @@ class CureSpell(WhiteMagicSpell):
             targeting="ally"  # Healing spells target allies by default
         )
         self.regen_chance = regen_chance
-        self.regen_potency = regen_potency
+        self.regen_percent = regen_percent
 
     def calculate_effect(self, caster) -> SpellEffect:
         """Calculate healing amount and potential regen effect"""
@@ -34,10 +34,12 @@ class CureSpell(WhiteMagicSpell):
         
         # Add regeneration status effect if applicable
         if self.regen_chance > 0:
+            # Store the percentage in the potency field
+            # The battle system will use this as a percentage of max_hp
             regen_effect = StatusEffect(
                 status=Status.REGEN,
                 duration=3,  # Lasts 3 turns
-                potency=self.regen_potency,
+                potency=int(self.regen_percent * 100),  # Store as percentage * 100 for easier reading
                 chance=self.regen_chance
             )
             effect.status_effects.append(regen_effect)
@@ -61,9 +63,9 @@ class Cura(CureSpell):
             name="Cura",
             mp_cost=10,
             base_healing=65,
-            regen_chance=0.25,  # 25% chance to apply regen
-            regen_potency=5,    # Heals 5 HP per turn if regen applies
-            description="Restores moderate HP with a chance to apply regeneration"
+            regen_chance=0.25,     # 25% chance to apply regen
+            regen_percent=0.05,    # Heals 5% of max HP per turn
+            description="Restores moderate HP with a chance to regenerate 5% HP per turn"
         )
 
 class Curaga(CureSpell):
@@ -73,9 +75,9 @@ class Curaga(CureSpell):
             name="Curaga",
             mp_cost=20,
             base_healing=120,
-            regen_chance=0.4,   # 40% chance to apply regen
-            regen_potency=10,   # Heals 10 HP per turn if regen applies
-            description="Restores significant HP with a high chance to apply regeneration"
+            regen_chance=0.4,      # 40% chance to apply regen
+            regen_percent=0.10,    # Heals 10% of max HP per turn
+            description="Restores significant HP with a chance to regenerate 10% HP per turn"
         )
         
         
