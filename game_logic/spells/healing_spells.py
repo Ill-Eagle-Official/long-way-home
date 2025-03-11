@@ -119,41 +119,76 @@ class MassRegen(CureSpell):
 
 # NULLIFY SPELLS
 
-class NulBlaze(WhiteMagicSpell):
+class NullifySpell(WhiteMagicSpell):
+    """Base class for spells that nullify specific damage types"""
+    def __init__(
+        self,
+        name: str,
+        mp_cost: int,
+        nullify_status: Status,
+        description: str
+    ):
+        super().__init__(
+            name=name,
+            mp_cost=mp_cost,
+            base_healing=0,
+            description=description,
+            targeting="ally"
+        )
+        self.nullify_status = nullify_status
+
+    def calculate_effect(self, caster) -> SpellEffect:
+        """Apply the nullify status effect"""
+        effect = SpellEffect()
+        
+        # Create nullify status effect that lasts until triggered
+        nullify_effect = StatusEffect(
+            status=self.nullify_status,
+            duration=-1,  # -1 means until triggered
+            potency=1,    # Will block 1 instance
+            chance=1.0    # Always applies
+        )
+        
+        effect.status_effects.append(nullify_effect)
+        return effect
+
+class NulBlaze(NullifySpell):
     """Nullifies one instance of fire damage"""
     def __init__(self):
         super().__init__(
             name="Nul Blaze",
             mp_cost=10,
-            base_healing=0,
+            nullify_status=Status.NULLIFY_FIRE,
             description="Nullifies one instance of fire damage"
         )
 
-class NulFrost(WhiteMagicSpell):
-    """Nullifies one instance of frost damage"""
+class NulFrost(NullifySpell):
+    """Nullifies one instance of ice damage"""
     def __init__(self):
         super().__init__(
             name="Nul Frost",
             mp_cost=10,
-            base_healing=0,
-            description="Nullifies one instance of frost damage"
+            nullify_status=Status.NULLIFY_ICE,
+            description="Nullifies one instance of ice damage"
         )
 
-class NulThunder(WhiteMagicSpell):
+class NulThunder(NullifySpell):
     """Nullifies one instance of thunder damage"""
     def __init__(self):
         super().__init__(
             name="Nul Thunder",
-            
+            mp_cost=10,
+            nullify_status=Status.NULLIFY_THUNDER,
+            description="Nullifies one instance of thunder damage"
         )
 
-class NulWater(WhiteMagicSpell):
+class NulWater(NullifySpell):
     """Nullifies one instance of water damage"""
     def __init__(self):
         super().__init__(
             name="Nul Water",
             mp_cost=10,
-            base_healing=0,
+            nullify_status=Status.NULLIFY_WATER,
             description="Nullifies one instance of water damage"
         )
 
@@ -191,7 +226,8 @@ class Dispel(WhiteMagicSpell):
     def __init__(self):
         super().__init__(
             name="Dispel",
-            mp_cost=12
+            mp_cost=12,
+            targeting="enemy"
         )
 
 class MassDispel(WhiteMagicSpell):
@@ -199,7 +235,8 @@ class MassDispel(WhiteMagicSpell):
     def __init__(self):
         super().__init__(
             name="Mass Dispel",
-            mp_cost=35
+            mp_cost=35,
+            targeting="enemy"
         )
 
 # BUFF/DEBUFF SPELLS
@@ -225,7 +262,8 @@ class Slow(WhiteMagicSpell):
     def __init__(self):
         super().__init__(
             name="Slow",
-            mp_cost=8
+            mp_cost=8,
+            targeting="enemy"
         )
 
 class MassSlow(WhiteMagicSpell):
@@ -233,7 +271,8 @@ class MassSlow(WhiteMagicSpell):
     def __init__(self):
         super().__init__(
             name="Mass Slow",
-            mp_cost=30
+            mp_cost=30,
+            targeting="enemy"
         )
 
 class Shell(WhiteMagicSpell):

@@ -2,6 +2,7 @@ import random
 from .character import Character
 from .enemy_database import get_random_enemy
 from .skills import get_skill_cost, get_spell_power
+from .spells.base import SpellEffect, DamageType, Status
 
 class Battle:
     """
@@ -143,6 +144,47 @@ class Battle:
         # Default to basic attack
         self._handle_attack(self.enemy, self.player)
 
+    def _apply_damage(self, target, effect: SpellEffect) -> int:
+        """
+        Apply damage to target, checking for nullification effects.
+        
+        Args:
+            target (Character): The target receiving damage
+            effect (SpellEffect): The spell effect containing damage and type
+            
+        Returns:
+            int: Actual damage dealt after nullification checks
+        """
+        if effect.damage <= 0:
+            return 0
+
+        # Check for nullification if it's magical damage
+        if effect.damage_type != DamageType.PHYSICAL and effect.damage_type != DamageType.NONE:
+            nullify_status = None
+            
+            # Map damage types to their nullification status
+            damage_type_to_status = {
+                DamageType.FIRE: Status.NULLIFY_FIRE,
+                DamageType.ICE: Status.NULLIFY_ICE,
+                DamageType.THUNDER: Status.NULLIFY_THUNDER,
+                DamageType.WATER: Status.NULLIFY_WATER
+            }
+            
+            nullify_status = damage_type_to_status.get(effect.damage_type)
+            
+            if nullify_status:
+                # Check if target has matching nullify status
+                for status in target.status_effects[:]:  # Create a copy to safely modify during iteration
+                    if status.status == nullify_status:
+                        # Remove the nullify status
+                        target.status_effects.remove(status)
+                        self.battle_log.append(f"{target.name} nullified the {effect.damage_type.value} damage!")
+                        return 0
+
+        # If not nullified, apply damage normally
+        actual_damage = target.take_damage(effect.damage)
+        return actual_damage
+
     def _handle_attack(self, attacker, target):
         """
         Process a basic attack action.
@@ -152,12 +194,8 @@ class Battle:
             target (Character): The target of the attack
         """
         result = attacker.calculate_damage(target)
-        damage = target.take_damage(result['damage'])
-        
-        # Debug logging
-        if isinstance(target, Character) and target == self.enemy:
-            print(f"Enemy HP after damage: {target.current_hp}/{target.max_hp}")
-            print(f"Enemy alive status: {target.is_alive()}")
+        effect = SpellEffect(damage=result['damage'], damage_type=DamageType.PHYSICAL)
+        damage = self._apply_damage(target, effect)
         
         # Create battle log message
         msg = f"{attacker.name} attacks {target.name} for {damage} damage!"
@@ -254,8 +292,15 @@ class Battle:
             return False
             
         if magic_type == 'black_magic':
+            # Get the spell instance from the spell registry
+            spell = self.player.get_spell(spell_name)
+            if not spell:
+                self.battle_log.append(f"Unknown spell: {spell_name}")
+                return False
+                
             result = self.player.calculate_magic_damage(self.enemy, spell_name)
-            damage = self.enemy.take_damage(result['damage'])
+            effect = SpellEffect(damage=result['damage'], damage_type=spell.damage_type)
+            damage = self._apply_damage(self.enemy, effect)
             
             msg = f"{self.player.name} casts {spell_name} for {damage} damage!"
             if result['is_critical']:

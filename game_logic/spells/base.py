@@ -14,6 +14,15 @@ class SpellType(Enum):
     ABILITY = "ability"
     SKILL = "skill"
 
+class DamageType(Enum):
+    """Defines the different types of damage"""
+    PHYSICAL = "physical"  # Regular physical attacks
+    FIRE = "fire"         # Fire-based magic
+    ICE = "ice"          # Ice-based magic
+    THUNDER = "thunder"   # Thunder-based magic
+    WATER = "water"       # Water-based magic
+    NONE = "none"        # No element (pure magic damage)
+
 class Status(Enum):
     """Defines possible status effects"""
     BURN = "burn"      # Deals damage over time
@@ -23,6 +32,10 @@ class Status(Enum):
     HASTE = "haste"    # Increased speed
     SLOW = "slow"      # Decreased speed
     REGEN = "regen"    # Heals HP over time
+    NULLIFY_FIRE = "nullify_fire"       # Blocks one instance of fire damage
+    NULLIFY_ICE = "nullify_ice"         # Blocks one instance of ice damage
+    NULLIFY_THUNDER = "nullify_thunder"  # Blocks one instance of thunder damage
+    NULLIFY_WATER = "nullify_water"      # Blocks one instance of water damage
 
 @dataclass
 class StatusEffect:
@@ -37,6 +50,7 @@ class SpellEffect:
     """Represents the effects a spell can have"""
     damage: int = 0
     healing: int = 0
+    damage_type: DamageType = DamageType.NONE
     stat_changes: dict = None
     status_effects: list[StatusEffect] = None
 
@@ -57,7 +71,8 @@ class Spell:
         spell_type: SpellType,
         base_power: int = 0,
         description: str = "",
-        targeting: str = "enemy"
+        targeting: str = "enemy",
+        damage_type: DamageType = DamageType.NONE
     ):
         self.name = name
         self.mp_cost = mp_cost
@@ -65,7 +80,7 @@ class Spell:
         self.base_power = base_power
         self.description = description
         self.targeting = targeting  # 'enemy', 'self', 'ally', 'all_enemies'
-
+        self.damage_type = damage_type
     def calculate_effect(self, caster, target) -> SpellEffect:
         """
         Calculate the effect of the spell based on caster and target stats.
@@ -109,7 +124,8 @@ class BlackMagicSpell(Spell):
         mp_cost: int,
         base_power: int,
         description: str = "",
-        targeting: str = "enemy"
+        targeting: str = "enemy",
+        damage_type: DamageType = DamageType.NONE
     ):
         super().__init__(
             name=name,
@@ -117,7 +133,8 @@ class BlackMagicSpell(Spell):
             spell_type=SpellType.BLACK_MAGIC,
             base_power=base_power,
             description=description,
-            targeting=targeting
+            targeting=targeting,
+            damage_type=damage_type
         )
 
     def calculate_effect(self, caster, target) -> SpellEffect:
