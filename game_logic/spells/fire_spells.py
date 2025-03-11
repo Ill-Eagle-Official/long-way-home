@@ -2,8 +2,7 @@
 Fire-based spell implementations.
 """
 
-import random
-from .base import BlackMagicSpell, SpellEffect, Status, StatusEffect
+from .base import BlackMagicSpell, SpellEffect, Status, StatusEffect, DamageType
 
 class FireSpell(BlackMagicSpell):
     """Base class for fire-element spells with burn effect"""
@@ -22,7 +21,8 @@ class FireSpell(BlackMagicSpell):
             mp_cost=mp_cost,
             base_power=base_power,
             description=description,
-            targeting="enemy"
+            targeting="enemy",
+            damage_type=DamageType.FIRE
         )
         self.burn_chance = burn_chance
         self.burn_potency = burn_potency
@@ -53,7 +53,7 @@ class Fire(FireSpell):
             base_power=20,
             burn_chance=0.2,  # 20% chance to burn
             burn_potency=2,   # 2 damage per turn if burned
-            description="Deals fire damage with a small chance to burn"
+            description="Deals fire damage with a small chance to burn",
         )
 
 class Fira(FireSpell):
