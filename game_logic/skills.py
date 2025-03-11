@@ -16,10 +16,12 @@ SKILL_COSTS = {
     'Dark Attack': 8,
     'Flee': 4,
     
-    # Magic
+    # Black Magic
     'Fire': 4,
     'Thunder': 4,
     'Blizzard': 4,
+
+    # White Magic
     'Cure': 4
 }
 

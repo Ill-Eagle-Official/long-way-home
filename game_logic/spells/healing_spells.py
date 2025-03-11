@@ -46,6 +46,39 @@ class CureSpell(WhiteMagicSpell):
         
         return effect
     
+class NullifySpell(WhiteMagicSpell):
+    """Base class for spells that nullify specific damage types"""
+    def __init__(
+        self,
+        name: str,
+        mp_cost: int,
+        nullify_status: Status,
+        description: str
+    ):
+        super().__init__(
+            name=name,
+            mp_cost=mp_cost,
+            base_healing=0,
+            description=description,
+            targeting="ally"
+        )
+        self.nullify_status = nullify_status
+
+    def calculate_effect(self, caster) -> SpellEffect:
+        """Apply the nullify status effect"""
+        effect = SpellEffect()
+        
+        # Create nullify status effect that lasts until triggered
+        nullify_effect = StatusEffect(
+            status=self.nullify_status,
+            duration=-1,  # -1 means until triggered
+            potency=1,    # Will block 1 instance
+            chance=1.0    # Always applies
+        )
+        
+        effect.status_effects.append(nullify_effect)
+        return effect
+    
 # HEALING SPELLS
 
 class Cure(CureSpell):
@@ -114,43 +147,13 @@ class MassRegen(CureSpell):
             mp_cost=80,
             regen_chance=1.0,
             regen_percent=0.20,
-            description="Applies the high regen status effect to all allies, which heals 20% max HP per turn"
+            description="Applies the high regen status effect to all allies, which heals 20% max HP per turn",
+            targeting="all_allies"
         )
 
 # NULLIFY SPELLS
 
-class NullifySpell(WhiteMagicSpell):
-    """Base class for spells that nullify specific damage types"""
-    def __init__(
-        self,
-        name: str,
-        mp_cost: int,
-        nullify_status: Status,
-        description: str
-    ):
-        super().__init__(
-            name=name,
-            mp_cost=mp_cost,
-            base_healing=0,
-            description=description,
-            targeting="ally"
-        )
-        self.nullify_status = nullify_status
 
-    def calculate_effect(self, caster) -> SpellEffect:
-        """Apply the nullify status effect"""
-        effect = SpellEffect()
-        
-        # Create nullify status effect that lasts until triggered
-        nullify_effect = StatusEffect(
-            status=self.nullify_status,
-            duration=-1,  # -1 means until triggered
-            potency=1,    # Will block 1 instance
-            chance=1.0    # Always applies
-        )
-        
-        effect.status_effects.append(nullify_effect)
-        return effect
 
 class NulBlaze(NullifySpell):
     """Nullifies one instance of fire damage"""
@@ -159,7 +162,8 @@ class NulBlaze(NullifySpell):
             name="Nul Blaze",
             mp_cost=10,
             nullify_status=Status.NULLIFY_FIRE,
-            description="Nullifies one instance of fire damage"
+            description="Nullifies one instance of fire damage",
+            targeting="all_allies"
         )
 
 class NulFrost(NullifySpell):
@@ -169,7 +173,8 @@ class NulFrost(NullifySpell):
             name="Nul Frost",
             mp_cost=10,
             nullify_status=Status.NULLIFY_ICE,
-            description="Nullifies one instance of ice damage"
+            description="Nullifies one instance of ice damage",
+            targeting="all_allies"
         )
 
 class NulThunder(NullifySpell):
@@ -179,7 +184,8 @@ class NulThunder(NullifySpell):
             name="Nul Thunder",
             mp_cost=10,
             nullify_status=Status.NULLIFY_THUNDER,
-            description="Nullifies one instance of thunder damage"
+            description="Nullifies one instance of thunder damage",
+            targeting="all_allies"
         )
 
 class NulWater(NullifySpell):
@@ -189,7 +195,8 @@ class NulWater(NullifySpell):
             name="Nul Water",
             mp_cost=10,
             nullify_status=Status.NULLIFY_WATER,
-            description="Nullifies one instance of water damage"
+            description="Nullifies one instance of water damage",
+            targeting="all_allies"
         )
 
 # STATUS CURE SPELLS
@@ -217,8 +224,8 @@ class MassRevive(WhiteMagicSpell):
     def __init__(self):
         super().__init__(
             name="Mass Revive",
-            mp_cost=60
-            
+            mp_cost=60,
+            targeting="all_allies"
         )
 
 class Dispel(WhiteMagicSpell):
@@ -236,7 +243,7 @@ class MassDispel(WhiteMagicSpell):
         super().__init__(
             name="Mass Dispel",
             mp_cost=35,
-            targeting="enemy"
+            targeting="all_enemies"
         )
 
 # BUFF/DEBUFF SPELLS
@@ -254,7 +261,8 @@ class MassHaste(WhiteMagicSpell):
     def __init__(self):
         super().__init__(
             name="Mass Haste",
-            mp_cost=30
+            mp_cost=30,
+            targeting="all_allies"
         )
 
 class Slow(WhiteMagicSpell):
@@ -272,7 +280,7 @@ class MassSlow(WhiteMagicSpell):
         super().__init__(
             name="Mass Slow",
             mp_cost=30,
-            targeting="enemy"
+            targeting="all_enemies"
         )
 
 class Shell(WhiteMagicSpell):

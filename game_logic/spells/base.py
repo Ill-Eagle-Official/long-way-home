@@ -26,6 +26,7 @@ class DamageType(Enum):
 class Status(Enum):
     """Defines possible status effects"""
     BURN = "burn"      # Deals damage over time
+    FREEZE = "freeze"  # Freezes the target
     POISON = "poison"  # Deals percentage-based damage over time
     BLIND = "blind"    # Reduces accuracy
     SLEEP = "sleep"    # Cannot act

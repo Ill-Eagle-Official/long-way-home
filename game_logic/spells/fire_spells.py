@@ -13,7 +13,7 @@ class FireSpell(BlackMagicSpell):
         mp_cost: int,
         base_power: int,
         burn_chance: float,
-        burn_potency: int,
+        burn_potency: float,
         description: str
     ):
         super().__init__(
@@ -52,7 +52,7 @@ class Fire(FireSpell):
             mp_cost=4,
             base_power=20,
             burn_chance=0.2,  # 20% chance to burn
-            burn_potency=2,   # 2 damage per turn if burned
+            burn_potency=0.05,   # 5% of max HP per turn if burned
             description="Deals fire damage with a small chance to burn",
         )
 
@@ -64,7 +64,7 @@ class Fira(FireSpell):
             mp_cost=12,
             base_power=45,
             burn_chance=0.35,  # 35% chance to burn
-            burn_potency=4,    # 4 damage per turn if burned
+            burn_potency=0.05,    # 5% of max HP per turn if burned
             description="Deals moderate fire damage with a moderate chance to burn"
         )
 
@@ -76,6 +76,48 @@ class Firaga(FireSpell):
             mp_cost=24,
             base_power=85,
             burn_chance=0.5,   # 50% chance to burn
-            burn_potency=8,    # 8 damage per turn if burned
+            burn_potency=0.05,    # 5% of max HP per turn if burned
             description="Deals heavy fire damage with a high chance to burn"
         ) 
+
+class Fireball(FireSpell):
+    """Fire spell which hits all enemies"""
+    def __init__(self):
+        super().__init__(
+            name="Fireball",
+            mp_cost=8,
+            base_power=20,
+            burn_chance=0.2,
+            burn_potency=0.05,
+            description="Fireball spell which hits all enemies",
+            targeting="all_enemies"
+        )
+        
+class Firaball(FireSpell):
+    """Fire spell which hits all allies"""
+    def __init__(self):
+        super().__init__(
+            name="Firaball",
+            mp_cost=24,
+            base_power=45,
+            burn_chance=0.35,
+            burn_potency=0.05,
+            description="Firaball spell which hits all enemies",
+            targeting="all_enemies"
+        )
+
+class Firagaball(FireSpell):
+    """Powerful fire spell which hits all enemies"""
+    def __init__(self):
+        super().__init__(
+            name="Firagaball",
+            mp_cost=48,
+            base_power=85,
+            burn_chance=0.5,
+            burn_potency=0.05,
+            description="Firagaball spell which hits all enemies",
+            targeting="all_enemies"
+        )
+        
+        
+        
