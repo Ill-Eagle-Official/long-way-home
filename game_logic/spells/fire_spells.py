@@ -13,7 +13,6 @@ class FireSpell(BlackMagicSpell):
         mp_cost: int,
         base_power: int,
         burn_chance: float,
-        burn_potency: float,
         description: str
     ):
         super().__init__(
@@ -25,7 +24,8 @@ class FireSpell(BlackMagicSpell):
             damage_type=DamageType.FIRE
         )
         self.burn_chance = burn_chance
-        self.burn_potency = burn_potency
+        self.burn_potency = 0.05 # 5% of max HP per turn if burned
+        self.burn_duration = 999
 
     def calculate_effect(self, caster, target) -> SpellEffect:
         """Calculate fire damage and potential burn effect"""
@@ -37,7 +37,8 @@ class FireSpell(BlackMagicSpell):
             status=Status.BURN,
             duration=3,  # Lasts 3 turns
             potency=self.burn_potency,
-            chance=self.burn_chance
+            chance=self.burn_chance,
+            duration=self.burn_duration
         )
         
         effect.status_effects.append(burn_effect)
@@ -52,7 +53,6 @@ class Fire(FireSpell):
             mp_cost=4,
             base_power=20,
             burn_chance=0.2,  # 20% chance to burn
-            burn_potency=0.05,   # 5% of max HP per turn if burned
             description="Deals fire damage with a small chance to burn",
         )
 
@@ -64,7 +64,6 @@ class Fira(FireSpell):
             mp_cost=12,
             base_power=45,
             burn_chance=0.35,  # 35% chance to burn
-            burn_potency=0.05,    # 5% of max HP per turn if burned
             description="Deals moderate fire damage with a moderate chance to burn"
         )
 
@@ -76,7 +75,6 @@ class Firaga(FireSpell):
             mp_cost=24,
             base_power=85,
             burn_chance=0.5,   # 50% chance to burn
-            burn_potency=0.05,    # 5% of max HP per turn if burned
             description="Deals heavy fire damage with a high chance to burn"
         ) 
 
@@ -88,7 +86,6 @@ class Fireball(FireSpell):
             mp_cost=8,
             base_power=20,
             burn_chance=0.2,
-            burn_potency=0.05,
             description="Fireball spell which hits all enemies",
             targeting="all_enemies"
         )
@@ -101,7 +98,6 @@ class Firaball(FireSpell):
             mp_cost=24,
             base_power=45,
             burn_chance=0.35,
-            burn_potency=0.05,
             description="Firaball spell which hits all enemies",
             targeting="all_enemies"
         )
@@ -114,7 +110,6 @@ class Firagaball(FireSpell):
             mp_cost=48,
             base_power=85,
             burn_chance=0.5,
-            burn_potency=0.05,
             description="Firagaball spell which hits all enemies",
             targeting="all_enemies"
         )
