@@ -49,4 +49,60 @@ class Thunder(ThunderSpell):
         )
 
 class Thundara(ThunderSpell):
-    """"""
+    """Mid-level thunder spell"""
+    def __init__(self):
+        super().__init__(
+            name="Thundara",
+            mp_cost=8,
+            base_power=45,
+            paralyze_chance=0.2,
+            description="Thundara spell which hits an enemy, mid paralyze chance"
+        )
+
+class Thundaga(ThunderSpell):
+    """High-level thunder spell"""
+    def __init__(self):
+        super().__init__(
+            name="Thundaga",
+            mp_cost=16,
+            base_power=85,
+            paralyze_chance=0.3,
+            description="Thundaga spell which hits an enemy, high paralyze chance"
+        )
+
+class Chainthunder(ThunderSpell):
+    """Multi-target thunder spell"""
+    def __init__(self):
+        super().__init__(
+            name="Chain Lightning",
+            mp_cost=8,
+            base_power=20,
+            paralyze_chance=0.1,
+            description="Basic thunder spell which hits all enemies, low paralyze chance",
+            targeting="all_enemies"
+        )
+
+class Chainthundara(ThunderSpell):
+    """Multi-target thunder spell"""
+    def __init__(self):
+        super().__init__(
+            name="Chain Thundara",
+            mp_cost=16,
+            base_power=45,
+            paralyze_chance=0.2,
+            description="Mid-level thunder spell which hits all enemies, mid paralyze chance",
+            targeting="all_enemies"
+        )
+
+class Chainthundaga(ThunderSpell):
+    """Multi-target thunder spell"""
+    def __init__(self):
+        super().__init__(
+            name="Chain Thundaga",
+            mp_cost=32,
+            base_power=85,
+            paralyze_chance=0.3,
+            description="High-level thunder spell which hits all enemies, high paralyze chance",
+            targeting="all_enemies"
+        )
+        
