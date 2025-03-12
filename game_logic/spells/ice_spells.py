@@ -3,7 +3,7 @@ Ice-based spell implementations.
 """
 
 from .base import BlackMagicSpell, SpellEffect, Status, StatusEffect, DamageType
-
+from random import randrange
 class IceSpell(BlackMagicSpell):
     """Base class for ice-element spells with freeze effect"""
     
@@ -13,7 +13,6 @@ class IceSpell(BlackMagicSpell):
         mp_cost: int,
         base_power: int,
         freeze_chance: float,
-        freeze_duration: int,
         description: str
     ):
         super().__init__(
@@ -25,7 +24,7 @@ class IceSpell(BlackMagicSpell):
             damage_type=DamageType.ICE
         )
         self.freeze_chance = freeze_chance
-        self.freeze_duration = freeze_duration
+        self.freeze_duration = randrange(1, 3)
 
     def calculate_effect(self, caster, target) -> SpellEffect:
         """Calculate ice damage and potential freeze effect"""
@@ -51,7 +50,6 @@ class Blizzard(IceSpell):
             mp_cost=4,
             base_power=20,
             freeze_chance=0.1,
-            freeze_duration=2,
             description="Frost spell which hits all enemies"
         )
 
@@ -63,7 +61,6 @@ class Blizzara(IceSpell):
             mp_cost=12,
             base_power=45,
             freeze_chance=0.25,
-            freeze_duration=2,
             description="Blizzara spell which hits all enemies"
         )
 
@@ -75,7 +72,6 @@ class Blizzaga(IceSpell):
             mp_cost=24,
             base_power=85,
             freeze_chance=0.4,
-            freeze_duration=2,
             description="Blizzaga spell which hits all enemies"
         )
 
@@ -87,7 +83,6 @@ class Icywind(IceSpell):
             mp_cost=8,
             base_power=20,
             freeze_chance=0.1,
-            freeze_duration=2,
             description="Multi-target ice spell",
             targeting="all_enemies"
         )
@@ -100,7 +95,6 @@ class Frostywind(IceSpell):
             mp_cost=24,
             base_power=45,
             freeze_chance=0.25,
-            freeze_duration=2,
             description="Mid-powered multi-target ice spell",
             targeting="all_enemies"
         )
@@ -113,7 +107,6 @@ class Frigidwind(IceSpell):
             mp_cost=48,
             base_power=85,
             freeze_chance=0.4,
-            freeze_duration=2,
             description="High-powered multi-target ice spell",
             targeting="all_enemies"
         )
