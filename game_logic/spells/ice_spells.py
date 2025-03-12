@@ -50,7 +50,7 @@ class Blizzard(IceSpell):
             name="Frost",
             mp_cost=4,
             base_power=20,
-            freeze_chance=0.2,
+            freeze_chance=0.1,
             freeze_duration=2,
             description="Frost spell which hits all enemies"
         )
@@ -62,7 +62,7 @@ class Blizzara(IceSpell):
             name="Blizzara",
             mp_cost=12,
             base_power=45,
-            freeze_chance=0.35,
+            freeze_chance=0.25,
             freeze_duration=2,
             description="Blizzara spell which hits all enemies"
         )
@@ -74,11 +74,47 @@ class Blizzaga(IceSpell):
             name="Blizzaga",
             mp_cost=24,
             base_power=85,
-            freeze_chance=0.5,
+            freeze_chance=0.4,
             freeze_duration=2,
             description="Blizzaga spell which hits all enemies"
         )
 
+class Icywind(IceSpell):
+    """Icywind spell"""
+    def __init__(self):
+        super().__init__(
+            name="Icywind", 
+            mp_cost=8,
+            base_power=20,
+            freeze_chance=0.1,
+            freeze_duration=2,
+            description="Multi-target ice spell",
+            targeting="all_enemies"
+        )
 
-        
+class Frostywind(IceSpell):
+    """Frostywind spell"""
+    def __init__(self):
+        super().__init__(
+            name="Frostywind",
+            mp_cost=24,
+            base_power=45,
+            freeze_chance=0.25,
+            freeze_duration=2,
+            description="Mid-powered multi-target ice spell",
+            targeting="all_enemies"
+        )
+
+class Frigidwind(IceSpell):
+    """Frigidwind spell"""
+    def __init__(self):
+        super().__init__(
+            name="Frigidwind",
+            mp_cost=48,
+            base_power=85,
+            freeze_chance=0.4,
+            freeze_duration=2,
+            description="High-powered multi-target ice spell",
+            targeting="all_enemies"
+        )
         
